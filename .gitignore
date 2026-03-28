@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.env
+.venv/
+venv/
+*.txt.bak
+resume_roast_feedback.txt
