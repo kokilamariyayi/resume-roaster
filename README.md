@@ -87,11 +87,7 @@ resume-roaster/
 
 ## 👩‍💻 Author
 
-**Kokila M**  
-*AI & Data Science Student | Tech Enthusiast*
 
-[![GitHub](https://img.shields.io/badge/GitHub-kokilamariyayi-black?logo=github)](https://github.com/kokilamariyayi)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?logo=linkedin)](https://linkedin.com/in/kokila-m)
 
 ---
 
