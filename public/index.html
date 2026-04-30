@@ -23,13 +23,16 @@
             <div class="history-section">
                 <h3>📈 Career Progress</h3>
                 <div id="historyList">
-                    <!-- History cards will be injected here -->
                     <div class="empty-history">No history found. Start your first analysis!</div>
                 </div>
             </div>
             
             <div class="sidebar-footer">
-                <p>Powered by Groq & Llama 3.3</p>
+                <div class="api-key-container">
+                    <label for="apiKeyInput" style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 0.3rem;">Groq API Key</label>
+                    <input type="password" id="apiKeyInput" placeholder="Enter API Key to run">
+                </div>
+                <p style="margin-top: 1rem;">Powered by Groq & Llama 3.3</p>
             </div>
         </aside>
 
@@ -37,9 +40,6 @@
         <main class="main-content">
             <header>
                 <h2>Candidate Profile & Analysis</h2>
-                <div class="api-key-container">
-                    <input type="password" id="apiKeyInput" placeholder="Enter Groq API Key" title="Required to generate the report">
-                </div>
             </header>
 
             <div class="form-grid">
@@ -48,13 +48,25 @@
                     <h3>📄 Input Section</h3>
                     
                     <div class="form-group">
-                        <label for="targetRole">🎯 Target Role</label>
-                        <input type="text" id="targetRole" placeholder="e.g. Data Scientist, Senior Engineer">
+                        <label for="targetRoleSelect">🎯 Target Role</label>
+                        <select id="targetRoleSelect">
+                            <option value="Software Engineer">Software Engineer</option>
+                            <option value="Data Scientist">Data Scientist</option>
+                            <option value="Machine Learning Engineer">Machine Learning Engineer</option>
+                            <option value="Product Manager">Product Manager</option>
+                            <option value="Data Analyst">Data Analyst</option>
+                            <option value="Backend Developer">Backend Developer</option>
+                            <option value="Frontend Developer">Frontend Developer</option>
+                            <option value="Full Stack Developer">Full Stack Developer</option>
+                            <option value="DevOps Engineer">DevOps Engineer</option>
+                            <option value="Other">Other (Specify below)</option>
+                        </select>
+                        <input type="text" id="targetRoleCustom" placeholder="e.g. Quantitative Analyst" style="display: none; margin-top: 0.5rem;">
                     </div>
                     
                     <div class="form-group">
                         <label for="resumeText">📝 Resume Content</label>
-                        <textarea id="resumeText" rows="8" placeholder="Paste your full resume text here..."></textarea>
+                        <textarea id="resumeText" rows="10" placeholder="Paste your full resume text here..."></textarea>
                     </div>
                 </div>
 

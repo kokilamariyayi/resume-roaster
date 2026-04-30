@@ -113,7 +113,8 @@ CONSTRAINTS:
 
 // ===== DOM Elements =====
 const apiKeyInput = document.getElementById('apiKeyInput');
-const targetRoleInput = document.getElementById('targetRole');
+const targetRoleSelect = document.getElementById('targetRoleSelect');
+const targetRoleCustom = document.getElementById('targetRoleCustom');
 const resumeTextInput = document.getElementById('resumeText');
 const jdTextInput = document.getElementById('jdText');
 const jdGroup = document.getElementById('jdGroup');
@@ -158,6 +159,16 @@ function initParticles() {
 
 // ===== Event Listeners =====
 function setupEventListeners() {
+    // Target Role Dropdown logic
+    targetRoleSelect.addEventListener('change', (e) => {
+        if (e.target.value === 'Other') {
+            targetRoleCustom.style.display = 'block';
+            targetRoleCustom.focus();
+        } else {
+            targetRoleCustom.style.display = 'none';
+        }
+    });
+
     // Mode toggles
     modeWithoutJdBtn.addEventListener('click', () => setMode('WITHOUT_JD'));
     modeWithJdBtn.addEventListener('click', () => setMode('WITH_JD'));
@@ -175,6 +186,7 @@ function setupEventListeners() {
     // Copy
     copyBtn.addEventListener('click', handleCopy);
 }
+
 
 function setMode(mode) {
     currentMode = mode;
@@ -246,7 +258,10 @@ function showToast(message, type = 'success') {
 // ===== Generate Logic =====
 async function handleGenerate() {
     const apiKey = apiKeyInput.value.trim();
-    const targetRole = targetRoleInput.value.trim();
+    let targetRole = targetRoleSelect.value;
+    if (targetRole === 'Other') {
+        targetRole = targetRoleCustom.value.trim();
+    }
     const resumeText = resumeTextInput.value.trim();
     const jdText = jdTextInput.value.trim();
 
@@ -258,7 +273,7 @@ async function handleGenerate() {
     }
     if (!targetRole) {
         showToast('Please specify a Target Role', 'error');
-        targetRoleInput.focus();
+        if (targetRoleSelect.value === 'Other') targetRoleCustom.focus();
         return;
     }
     if (!resumeText) {
