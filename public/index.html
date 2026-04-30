@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beat-The-ATS | AI Career Intelligence</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Marked.js for parsing markdown response -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- pdf.js for parsing PDF (Optional, we will stick to text paste for MVP speed, but I'll add basic structure) -->
+</head>
+<body>
+    <div id="bgParticles"></div>
+    
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="brand">
+                <h1>🚀 Beat-The-ATS</h1>
+                <p>AI Career Intelligence</p>
+            </div>
+            
+            <div class="history-section">
+                <h3>📈 Career Progress</h3>
+                <div id="historyList">
+                    <!-- History cards will be injected here -->
+                    <div class="empty-history">No history found. Start your first analysis!</div>
+                </div>
+            </div>
+            
+            <div class="sidebar-footer">
+                <p>Powered by Groq & Llama 3.3</p>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header>
+                <h2>Candidate Profile & Analysis</h2>
+                <div class="api-key-container">
+                    <input type="password" id="apiKeyInput" placeholder="Enter Groq API Key" title="Required to generate the report">
+                </div>
+            </header>
+
+            <div class="form-grid">
+                <!-- Left Column: Inputs -->
+                <div class="card">
+                    <h3>📄 Input Section</h3>
+                    
+                    <div class="form-group">
+                        <label for="targetRole">🎯 Target Role</label>
+                        <input type="text" id="targetRole" placeholder="e.g. Data Scientist, Senior Engineer">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="resumeText">📝 Resume Content</label>
+                        <textarea id="resumeText" rows="8" placeholder="Paste your full resume text here..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Right Column: Settings -->
+                <div class="card">
+                    <h3>⚙️ Analysis Configuration</h3>
+                    
+                    <div class="form-group">
+                        <label>Analysis Mode</label>
+                        <div class="radio-group">
+                            <label class="radio-btn active" id="modeWithoutJdBtn">
+                                <input type="radio" name="mode" value="WITHOUT_JD" checked>
+                                🏢 Benchmark (No JD)
+                            </label>
+                            <label class="radio-btn" id="modeWithJdBtn">
+                                <input type="radio" name="mode" value="WITH_JD">
+                                🎯 JD Alignment
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" id="jdGroup" style="display: none;">
+                        <label for="jdText">📋 Job Description</label>
+                        <textarea id="jdText" rows="6" placeholder="Paste the target job description here..."></textarea>
+                    </div>
+                    
+                    <div class="info-box" id="modeInfo">
+                        ℹ️ <strong>Benchmark Mode:</strong> The AI will evaluate your resume against top-tier industry standards for your selected target role.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Button -->
+            <button id="generateBtn" class="primary-btn">
+                <span class="btn-content">🚀 GENERATE INTELLIGENCE REPORT</span>
+                <span class="btn-loading" style="display: none;">
+                    <svg class="spinner" viewBox="0 0 50 50">
+                        <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
+                    </svg>
+                    Analyzing Resume...
+                </span>
+            </button>
+
+            <!-- Results Section -->
+            <div id="resultsSection" style="display: none;">
+                <div class="card results-card">
+                    <div class="results-header">
+                        <h2>📊 Career Optimization Intelligence Report</h2>
+                        <button id="copyBtn" class="secondary-btn">Copy Report</button>
+                    </div>
+                    <div id="reportContent" class="markdown-body">
+                        <!-- Markdown parsed HTML will go here -->
+                    </div>
+                </div>
+            </div>
+            
+            <div id="toast" class="toast"></div>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
