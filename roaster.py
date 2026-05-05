@@ -1,4 +1,5 @@
 from groq import Groq
+import base64
 
 SYSTEM_PROMPT = """You are an advanced AI Resume Intelligence System designed to perform multi-level analysis, role inference, and career optimization.
 
@@ -130,5 +131,32 @@ USER_HISTORY: {history_json}
         ],
         temperature=0.85,
         max_tokens=3000
+    )
+    return response.choices[0].message.content
+
+def extract_text_from_image(image_bytes: bytes, api_key: str) -> str:
+    """Use Groq Vision model to extract text from a resume image."""
+    client = Groq(api_key=api_key)
+    
+    base64_image = base64.b64encode(image_bytes).decode('utf-8')
+    
+    response = client.chat.completions.create(
+        model="llama-3.2-11b-vision-preview",
+        messages=[
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": "Extract all text from this resume image. Maintain the structure as much as possible. Output ONLY the extracted text."},
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"data:image/jpeg;base64,{base64_image}",
+                        },
+                    },
+                ],
+            }
+        ],
+        temperature=0.1,
+        max_tokens=2048
     )
     return response.choices[0].message.content

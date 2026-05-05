@@ -1,6 +1,7 @@
 import streamlit as st
-from roaster import roast_resume
+from roaster import roast_resume, extract_text_from_image
 import pdfplumber
+import docx
 import io
 import os
 import json
@@ -117,9 +118,6 @@ def save_history(role, score, mode):
 st.markdown("<h1 style='text-align: center; margin-bottom: 0;'>🚀 Beat-The-ATS</h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center; color: #94a3b8; font-size: 1.2rem; margin-bottom: 2rem;'>Multi-level Analysis • Role Inference • Career Optimization</p>", unsafe_allow_html=True)
 
-# Load API key
-api_key = os.getenv("GROQ_API_KEY", "")
-
 # --- Sidebar: History & Insights ---
 with st.sidebar:
     st.image("https://cdn-icons-png.flaticon.com/512/3135/3135715.png", width=60) # Placeholder icon
@@ -137,6 +135,21 @@ with st.sidebar:
     else:
         st.info("No history found. Start your first analysis!")
         
+    # API Key Section
+    if not os.getenv("GROQ_API_KEY"):
+        st.markdown("---")
+        st.header("🔑 API Configuration")
+        temp_key = st.text_input("Groq API Key", type="password", placeholder="gsk_...")
+        if temp_key:
+            st.session_state.groq_api_key = temp_key
+            st.success("API Key set for this session!")
+        else:
+            st.warning("Please provide an API key to proceed.")
+    else:
+        st.session_state.groq_api_key = os.getenv("GROQ_API_KEY")
+        st.markdown("---")
+        st.success("✅ API Key loaded from environment")
+
     st.markdown("---")
     st.caption("Powered by Groq & Llama 3.3")
 
@@ -161,17 +174,33 @@ with col1:
         target_role = selected_role
     
     # Resume Input
-    input_method = st.radio("Resume Format", ["Paste Text", "Upload PDF"], horizontal=True)
+    input_method = st.radio("Resume Format", ["Paste Text", "Upload File"], horizontal=True)
     resume_text = ""
     
     if input_method == "Paste Text":
         resume_text = st.text_area("Resume Content", height=250, placeholder="Paste your full resume text here...")
     else:
-        uploaded_resume = st.file_uploader("Upload Resume PDF", type=["pdf"])
+        uploaded_resume = st.file_uploader("Upload Resume", type=["pdf", "docx", "png", "jpg", "jpeg"])
         if uploaded_resume:
-            with pdfplumber.open(io.BytesIO(uploaded_resume.read())) as pdf:
-                resume_text = "\n".join(page.extract_text() for page in pdf.pages if page.extract_text())
-            st.success("✅ Resume Extracted Successfully!")
+            file_ext = uploaded_resume.name.split('.')[-1].lower()
+            try:
+                if file_ext == 'pdf':
+                    with pdfplumber.open(io.BytesIO(uploaded_resume.read())) as pdf:
+                        resume_text = "\n".join(page.extract_text() for page in pdf.pages if page.extract_text())
+                elif file_ext == 'docx':
+                    doc = docx.Document(io.BytesIO(uploaded_resume.read()))
+                    resume_text = "\n".join([para.text for para in doc.paragraphs])
+                elif file_ext in ['png', 'jpg', 'jpeg']:
+                    if not st.session_state.get('groq_api_key'):
+                        st.error("API Key required for image processing.")
+                    else:
+                        with st.spinner("🔍 AI Vision: Extracting text from image..."):
+                            resume_text = extract_text_from_image(uploaded_resume.read(), st.session_state.groq_api_key)
+                
+                if resume_text:
+                    st.success(f"✅ {file_ext.upper()} Extracted Successfully!")
+            except Exception as e:
+                st.error(f"Error extracting file: {e}")
 
 with col2:
     st.markdown("### ⚙️ Analysis Parameters")
@@ -182,15 +211,28 @@ with col2:
     
     job_description = ""
     if mode == "WITH_JD":
-        jd_input_method = st.radio("JD Format", ["Paste Text", "Upload PDF"], horizontal=True)
+        jd_input_method = st.radio("JD Format", ["Paste Text", "Upload File"], horizontal=True)
         if jd_input_method == "Paste Text":
             job_description = st.text_area("Job Description", height=250, placeholder="Paste the target job description here...")
         else:
-            uploaded_jd = st.file_uploader("Upload JD PDF", type=["pdf"])
+            uploaded_jd = st.file_uploader("Upload Job Description", type=["pdf", "docx", "png", "jpg", "jpeg"])
             if uploaded_jd:
-                with pdfplumber.open(io.BytesIO(uploaded_jd.read())) as pdf:
-                    job_description = "\n".join(page.extract_text() for page in pdf.pages if page.extract_text())
-                st.success("✅ JD Extracted Successfully!")
+                file_ext = uploaded_jd.name.split('.')[-1].lower()
+                try:
+                    with st.spinner(f"Extracting JD from {file_ext.upper()}..."):
+                        if file_ext == 'pdf':
+                            with pdfplumber.open(io.BytesIO(uploaded_jd.read())) as pdf:
+                                job_description = "\n".join(page.extract_text() for page in pdf.pages if page.extract_text())
+                        elif file_ext == 'docx':
+                            doc = docx.Document(io.BytesIO(uploaded_jd.read()))
+                            job_description = "\n".join([para.text for para in doc.paragraphs])
+                        elif file_ext in ['png', 'jpg', 'jpeg']:
+                            job_description = extract_text_from_image(uploaded_jd.read(), st.session_state.groq_api_key)
+                    
+                    if job_description:
+                        st.success("✅ JD Extracted Successfully!")
+                except Exception as e:
+                    st.error(f"Error extracting JD: {e}")
     else:
         st.info("ℹ️ **Benchmark Mode:** The AI will evaluate your resume against top-tier industry standards for your selected target role.")
 
@@ -202,8 +244,9 @@ with center_col:
     analyze_btn = st.button("🚀 GENERATE INTELLIGENCE REPORT", use_container_width=True)
 
 if analyze_btn:
+    api_key = st.session_state.get('groq_api_key', '')
     if not api_key:
-        st.error("⚠️ API Key missing. Please set GROQ_API_KEY in your .env file.")
+        st.error("⚠️ API Key missing. Please provide it in the sidebar or set GROQ_API_KEY in .env.")
     elif not resume_text.strip():
         st.error("⚠️ Please provide a resume.")
     elif not target_role.strip():
