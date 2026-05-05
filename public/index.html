@@ -7,7 +7,8 @@
     <link rel="stylesheet" href="style.css">
     <!-- Marked.js for parsing markdown response -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <!-- pdf.js for parsing PDF (Optional, we will stick to text paste for MVP speed, but I'll add basic structure) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 </head>
 <body>
     <div id="bgParticles"></div>
@@ -65,8 +66,14 @@
                     </div>
                     
                     <div class="form-group">
-                        <label for="resumeText">📝 Resume Content</label>
-                        <textarea id="resumeText" rows="10" placeholder="Paste your full resume text here..."></textarea>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                            <label for="resumeText">📝 Resume Content</label>
+                            <div class="upload-btn-wrapper">
+                                <button class="btn-small">📎 Upload File</button>
+                                <input type="file" id="resumeFile" accept=".pdf,.docx,.png,.jpg,.jpeg">
+                            </div>
+                        </div>
+                        <textarea id="resumeText" rows="10" placeholder="Paste your full resume text here or upload a file..."></textarea>
                     </div>
                 </div>
 
@@ -89,8 +96,14 @@
                     </div>
                     
                     <div class="form-group" id="jdGroup" style="display: none;">
-                        <label for="jdText">📋 Job Description</label>
-                        <textarea id="jdText" rows="6" placeholder="Paste the target job description here..."></textarea>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                            <label for="jdText">📋 Job Description</label>
+                            <div class="upload-btn-wrapper">
+                                <button class="btn-small">📎 Upload File</button>
+                                <input type="file" id="jdFile" accept=".pdf,.docx,.png,.jpg,.jpeg">
+                            </div>
+                        </div>
+                        <textarea id="jdText" rows="6" placeholder="Paste the target job description here or upload a file..."></textarea>
                     </div>
                     
                     <div class="info-box" id="modeInfo">

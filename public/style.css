@@ -414,6 +414,40 @@ input:focus, textarea:focus {
 .toast-success { border-left: 4px solid var(--success); }
 .toast-error { border-left: 4px solid var(--error); }
 
+/* Upload Button Styling */
+.upload-btn-wrapper {
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+}
+
+.btn-small {
+    background: var(--surface-hover);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-small:hover {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.upload-btn-wrapper input[type=file] {
+    font-size: 100px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
     .form-grid { grid-template-columns: 1fr; }

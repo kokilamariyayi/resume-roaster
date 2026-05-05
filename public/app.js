@@ -140,6 +140,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load saved API key if exists
     const savedKey = localStorage.getItem('GROQ_API_KEY');
     if (savedKey) apiKeyInput.value = savedKey;
+
+    // Initialize PDF.js worker
+    if (typeof pdfjsLib !== 'undefined') {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
 });
 
 // ===== Background Particles =====
@@ -185,6 +190,106 @@ function setupEventListeners() {
     
     // Copy
     copyBtn.addEventListener('click', handleCopy);
+
+    // File Uploads
+    document.getElementById('resumeFile').addEventListener('change', (e) => handleFileUpload(e, 'resumeText'));
+    document.getElementById('jdFile').addEventListener('change', (e) => handleFileUpload(e, 'jdText'));
+}
+
+async function handleFileUpload(event, targetId) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const textArea = document.getElementById(targetId);
+    const fileName = file.name.toLowerCase();
+    const fileExt = fileName.split('.').pop();
+
+    try {
+        showToast(`Reading ${file.name}...`, 'info');
+        
+        if (fileExt === 'pdf') {
+            const text = await extractTextFromPdf(file);
+            textArea.value = text;
+        } else if (fileExt === 'docx') {
+            const text = await extractTextFromDocx(file);
+            textArea.value = text;
+        } else if (['png', 'jpg', 'jpeg'].includes(fileExt)) {
+            const text = await extractTextFromImage(file);
+            textArea.value = text;
+        } else {
+            showToast('Unsupported file format', 'error');
+            return;
+        }
+        
+        showToast(`✓ ${file.name} loaded successfully!`);
+        // Clear input so same file can be uploaded again if needed
+        event.target.value = '';
+    } catch (error) {
+        console.error(error);
+        showToast(`Error reading file: ${error.message}`, 'error');
+    }
+}
+
+async function extractTextFromPdf(file) {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    let fullText = '';
+    for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const textContent = await page.getTextContent();
+        fullText += textContent.items.map(item => item.str).join(' ') + '\n';
+    }
+    return fullText;
+}
+
+async function extractTextFromDocx(file) {
+    const arrayBuffer = await file.arrayBuffer();
+    const result = await mammoth.extractRawText({ arrayBuffer });
+    return result.value;
+}
+
+async function extractTextFromImage(file) {
+    const apiKey = apiKeyInput.value.trim();
+    if (!apiKey) throw new Error('API Key required for image processing');
+
+    const base64Image = await fileToBase64(file);
+    
+    const response = await fetch(GROQ_API_URL, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+            model: 'llama-3.2-11b-vision-preview',
+            messages: [
+                {
+                    role: 'user',
+                    content: [
+                        { type: 'text', text: 'Extract all text from this resume image. Output ONLY the extracted text.' },
+                        { type: 'image_url', image_url: { url: base64Image } }
+                    ]
+                }
+            ],
+            temperature: 0.1,
+        })
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error?.message || 'Vision API failed');
+    }
+    const data = await response.json();
+    return data.choices[0].message.content;
+}
+
+function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
 }
 
 
